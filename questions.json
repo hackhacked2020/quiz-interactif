@@ -8,6 +8,14 @@
         "correct": ["b"]
     },
     {
+        "question": "Identifiez ce monument: <img src='images/tour-eiffel.jpg' alt='Monument parisien' class='img-fluid mb-3'>",
+        "option_a": "Big Ben",
+        "option_b": "Tour Eiffel",
+        "option_c": "Statue de la Liberté",
+        "option_d": "Tour de Pise",
+        "correct": ["b"]
+    },
+    {
         "question": "Quels sont les pays membres permanents du Conseil de sécurité de l'ONU?",
         "option_a": "États-Unis",
         "option_b": "Royaume-Uni",
