@@ -5,19 +5,67 @@ let timer;
 let timeLeft;
 let userAnswers = [];
 
+// Settings
+let quizSettings = {
+    shuffleQuestions: true,
+    enableSound: true,
+    autoNext: false,
+    autoNextDelay: 3
+};
+
+// Load settings from localStorage
+function loadSettings() {
+    const savedSettings = localStorage.getItem('quizSettings');
+    if (savedSettings) {
+        quizSettings = { ...quizSettings, ...JSON.parse(savedSettings) };
+        // Update UI
+        document.getElementById('shuffleQuestions').checked = quizSettings.shuffleQuestions;
+        document.getElementById('enableSound').checked = quizSettings.enableSound;
+        document.getElementById('autoNext').checked = quizSettings.autoNext;
+        document.getElementById('autoNextDelay').value = quizSettings.autoNextDelay;
+    }
+}
+
+// Save settings to localStorage
+function saveSettings() {
+    quizSettings.shuffleQuestions = document.getElementById('shuffleQuestions').checked;
+    quizSettings.enableSound = document.getElementById('enableSound').checked;
+    quizSettings.autoNext = document.getElementById('autoNext').checked;
+    quizSettings.autoNextDelay = parseInt(document.getElementById('autoNextDelay').value);
+    localStorage.setItem('quizSettings', JSON.stringify(quizSettings));
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById('settingsModal'));
+    modal.hide();
+}
+
 // Load questions from JSON
 async function loadQuestions() {
     try {
         const response = await fetch('questions.json');
         questions = await response.json();
+        if (quizSettings.shuffleQuestions) {
+            questions = shuffleArray(questions);
+        }
         document.getElementById('total-questions').textContent = questions.length;
     } catch (error) {
         console.error('Error loading questions:', error);
     }
 }
 
+// Fisher-Yates shuffle algorithm
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
 // Initialize quiz
-loadQuestions();
+window.onload = function() {
+    loadSettings();
+    loadQuestions();
+};
 
 function startQuiz() {
     document.getElementById('welcome-screen').classList.add('d-none');
@@ -39,11 +87,10 @@ function loadQuestion() {
     const question = questions[currentQuestionIndex];
     document.getElementById('current-question').textContent = currentQuestionIndex + 1;
     document.getElementById('question-text').innerHTML = question.question;
-    
+
     const optionsContainer = document.getElementById('options-container');
     optionsContainer.innerHTML = '';
-    
-    // Create option buttons
+
     ['a', 'b', 'c', 'd', 'e', 'f'].forEach(option => {
         if (question[`option_${option}`]) {
             const button = document.createElement('button');
@@ -55,13 +102,11 @@ function loadQuestion() {
         }
     });
 
-    // Reset timer
     timeLeft = 120;
     updateTimer();
     if (timer) clearInterval(timer);
     timer = setInterval(updateTimer, 1000);
-    
-    // Reset validate button
+
     const validateBtn = document.getElementById('validate-btn');
     validateBtn.disabled = true;
     validateBtn.classList.remove('d-none');
@@ -71,7 +116,6 @@ function loadQuestion() {
 function toggleOption(button) {
     const question = questions[currentQuestionIndex];
     if (question.correct.length === 1) {
-        // Single choice question
         document.querySelectorAll('.option-btn.selected').forEach(btn => btn.classList.remove('selected'));
     }
     button.classList.toggle('selected');
@@ -82,17 +126,19 @@ function toggleOption(button) {
 function updateTimer() {
     const timerElement = document.getElementById('timer');
     timerElement.textContent = `${timeLeft}s`;
-    
+
     if (timeLeft <= 10) {
         timerElement.classList.add('timer-warning');
-        document.getElementById('tick-sound').play().catch(() => {});
+        if (quizSettings.enableSound) {
+            document.getElementById('tick-sound').play().catch(() => {});
+        }
     }
-    
+
     if (timeLeft <= 0) {
         clearInterval(timer);
         validateAnswer(true);
     }
-    
+
     timeLeft--;
 }
 
@@ -101,17 +147,21 @@ function validateAnswer(timeout = false) {
     const question = questions[currentQuestionIndex];
     const selectedOptions = Array.from(document.querySelectorAll('.option-btn.selected'))
         .map(btn => btn.getAttribute('data-option'));
-    
+
     const isCorrect = arraysEqual(selectedOptions.sort(), question.correct.sort());
     userAnswers[currentQuestionIndex] = selectedOptions;
-    
+
     if (isCorrect) {
         score++;
-        document.getElementById('correct-sound').play().catch(() => {});
+        if (quizSettings.enableSound) {
+            document.getElementById('correct-sound').play().catch(() => {});
+        }
     } else {
-        document.getElementById('wrong-sound').play().catch(() => {});
+        if (quizSettings.enableSound) {
+            document.getElementById('wrong-sound').play().catch(() => {});
+        }
     }
-    
+
     // Show correct/incorrect answers
     document.querySelectorAll('.option-btn').forEach(btn => {
         const option = btn.getAttribute('data-option');
@@ -122,12 +172,17 @@ function validateAnswer(timeout = false) {
         }
         btn.disabled = true;
     });
-    
+
     document.getElementById('validate-btn').classList.add('d-none');
     document.getElementById('next-btn').classList.remove('d-none');
-    
+
     if (currentQuestionIndex === questions.length - 1) {
         document.getElementById('next-btn').textContent = 'Voir les résultats';
+    }
+
+    // Auto-next if enabled
+    if (quizSettings.autoNext && currentQuestionIndex < questions.length - 1) {
+        setTimeout(nextQuestion, quizSettings.autoNextDelay * 1000);
     }
 }
 
@@ -143,17 +198,16 @@ function nextQuestion() {
 function showResults() {
     document.getElementById('quiz-screen').classList.add('d-none');
     document.getElementById('results-screen').classList.remove('d-none');
-    
+
     const finalScore = document.getElementById('final-score');
     const maxScore = document.getElementById('max-score');
     const scoreProgress = document.getElementById('score-progress');
     const detailedResults = document.getElementById('detailed-results');
-    
+
     finalScore.textContent = score;
     maxScore.textContent = questions.length;
     scoreProgress.style.width = `${(score / questions.length) * 100}%`;
-    
-    // Generate detailed results
+
     detailedResults.innerHTML = questions.map((question, index) => {
         const isCorrect = arraysEqual(userAnswers[index].sort(), question.correct.sort());
         return `
@@ -171,6 +225,9 @@ function restartQuiz() {
     currentQuestionIndex = 0;
     score = 0;
     userAnswers = [];
+    if (quizSettings.shuffleQuestions) {
+        questions = shuffleArray(questions);
+    }
     document.getElementById('results-screen').classList.add('d-none');
     document.getElementById('welcome-screen').classList.remove('d-none');
 }

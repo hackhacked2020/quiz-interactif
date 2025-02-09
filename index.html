@@ -12,7 +12,12 @@
         <!-- Welcome Screen -->
         <div id="welcome-screen" class="text-center">
             <h1 class="display-4 mb-4">Quiz Interactif</h1>
-            <button class="btn btn-primary btn-lg" onclick="startQuiz()">Commencer</button>
+            <div class="d-flex justify-content-center gap-3">
+                <button class="btn btn-primary btn-lg" onclick="startQuiz()">Commencer</button>
+                <button class="btn btn-secondary btn-lg" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                    <i class="bi bi-gear"></i> Paramètres
+                </button>
+            </div>
         </div>
 
         <!-- Instructions Screen -->
@@ -77,6 +82,46 @@
                 </div>
             </div>
             <button class="btn btn-primary" onclick="restartQuiz()">Recommencer</button>
+        </div>
+
+        <!-- Settings Modal -->
+        <div class="modal fade" id="settingsModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Paramètres du Quiz</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="shuffleQuestions" checked>
+                            <label class="form-check-label" for="shuffleQuestions">
+                                Mélanger les questions
+                            </label>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="enableSound" checked>
+                            <label class="form-check-label" for="enableSound">
+                                Activer le son
+                            </label>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="autoNext">
+                            <label class="form-check-label" for="autoNext">
+                                Passer automatiquement à la question suivante
+                            </label>
+                        </div>
+                        <div class="mb-3">
+                            <label for="autoNextDelay" class="form-label">Délai avant passage automatique (secondes)</label>
+                            <input type="number" class="form-control" id="autoNextDelay" min="1" max="10" value="3">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        <button type="button" class="btn btn-primary" onclick="saveSettings()">Enregistrer</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
