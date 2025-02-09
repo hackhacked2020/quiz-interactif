@@ -45,11 +45,11 @@ function loadQuestion() {
     
     // Create option buttons
     ['a', 'b', 'c', 'd', 'e', 'f'].forEach(option => {
-        if (question[option]) {
+        if (question[`option_${option}`]) {
             const button = document.createElement('button');
             button.className = 'btn btn-outline-light option-btn';
             button.setAttribute('data-option', option);
-            button.innerHTML = question[option];
+            button.innerHTML = question[`option_${option}`];
             button.onclick = () => toggleOption(button);
             optionsContainer.appendChild(button);
         }
@@ -69,6 +69,11 @@ function loadQuestion() {
 }
 
 function toggleOption(button) {
+    const question = questions[currentQuestionIndex];
+    if (question.correct.length === 1) {
+        // Single choice question
+        document.querySelectorAll('.option-btn.selected').forEach(btn => btn.classList.remove('selected'));
+    }
     button.classList.toggle('selected');
     const validateBtn = document.getElementById('validate-btn');
     validateBtn.disabled = !document.querySelector('.option-btn.selected');
@@ -80,7 +85,7 @@ function updateTimer() {
     
     if (timeLeft <= 10) {
         timerElement.classList.add('timer-warning');
-        document.getElementById('tick-sound').play();
+        document.getElementById('tick-sound').play().catch(() => {});
     }
     
     if (timeLeft <= 0) {
@@ -102,9 +107,9 @@ function validateAnswer(timeout = false) {
     
     if (isCorrect) {
         score++;
-        document.getElementById('correct-sound').play();
+        document.getElementById('correct-sound').play().catch(() => {});
     } else {
-        document.getElementById('wrong-sound').play();
+        document.getElementById('wrong-sound').play().catch(() => {});
     }
     
     // Show correct/incorrect answers
@@ -155,8 +160,8 @@ function showResults() {
             <div class="question-review ${isCorrect ? 'correct' : 'incorrect'}">
                 <h5>Question ${index + 1}</h5>
                 <p>${question.question}</p>
-                <p><strong>Votre réponse:</strong> ${userAnswers[index].map(opt => question[opt]).join(', ')}</p>
-                <p><strong>Bonne réponse:</strong> ${question.correct.map(opt => question[opt]).join(', ')}</p>
+                <p><strong>Votre réponse:</strong> ${userAnswers[index].map(opt => question[`option_${opt}`]).join(', ')}</p>
+                <p><strong>Bonne réponse:</strong> ${question.correct.map(opt => question[`option_${opt}`]).join(', ')}</p>
             </div>
         `;
     }).join('');

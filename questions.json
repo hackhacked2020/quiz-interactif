@@ -1,20 +1,20 @@
 [
     {
-        "question": "Question 1: Quelle est la capitale de la France?",
-        "a": "Londres",
-        "b": "Paris",
-        "c": "Berlin",
-        "d": "Madrid",
+        "question": "Quelle est la capitale de la France?",
+        "option_a": "Londres",
+        "option_b": "Paris",
+        "option_c": "Berlin",
+        "option_d": "Madrid",
         "correct": ["b"]
     },
     {
-        "question": "Question 2: Quels sont les pays membres permanents du Conseil de sécurité de l'ONU? (Plusieurs réponses possibles)",
-        "a": "États-Unis",
-        "b": "Royaume-Uni",
-        "c": "France",
-        "d": "Chine",
-        "e": "Russie",
-        "f": "Japon",
+        "question": "Quels sont les pays membres permanents du Conseil de sécurité de l'ONU?",
+        "option_a": "États-Unis",
+        "option_b": "Royaume-Uni",
+        "option_c": "France",
+        "option_d": "Chine",
+        "option_e": "Russie",
+        "option_f": "Japon",
         "correct": ["a", "b", "c", "d", "e"]
     }
 ]
